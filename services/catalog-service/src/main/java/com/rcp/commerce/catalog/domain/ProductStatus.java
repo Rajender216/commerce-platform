@@ -1,5 +1,7 @@
 package com.rcp.commerce.catalog.domain;
 
 public enum ProductStatus {
-    DRAFT
+    DRAFT,
+    ACTIVE,
+    INACTIVE
 }

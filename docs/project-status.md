@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-MVP roadmap alignment.
+MVP Phase 1 - Catalog Service.
 
 ## Repository State
 
@@ -15,7 +15,7 @@ Current repository contents:
 - Root aggregator POM
 - `build-platform` POM-only module
 - Build verification scripts
-- `services/catalog-service` service foundation
+- `services/catalog-service` MVP catalog implementation
 - Active MVP roadmap documentation
 
 Application code exists only in `services/catalog-service`.
@@ -30,7 +30,11 @@ Application code exists only in `services/catalog-service`.
 - Central dependency and plugin management configured.
 - Maven Enforcer, compiler, Surefire, Failsafe, JaCoCo, and Spotless configured.
 - Catalog service added to the Maven reactor.
-- Draft product create/get API implemented.
+- Admin category, product, variant, stock, and image URL APIs implemented.
+- Public category and product browsing APIs implemented.
+- Product filtering, pagination, basic PostgreSQL search, price range, and
+  in-stock filters implemented.
+- Draft, active, and inactive product statuses implemented.
 - Service-local Problem Details-style error handling implemented.
 - Correlation ID filter implemented.
 - PostgreSQL/Flyway/JPA persistence path implemented.
@@ -47,7 +51,7 @@ Application code exists only in `services/catalog-service`.
 
 ## Next Recommended Phase
 
-Next recommended work is MVP Phase 1: Catalog.
+Next recommended work is MVP Phase 2: Authentication and Customer.
 
 Production-maturity work remains post-MVP unless explicitly approved.
 
@@ -67,6 +71,6 @@ Possible post-MVP follow-ups:
 - Do not commit or push without explicit approval.
 - Do not create discovery, gateway, or config-server modules unless the active
   task explicitly approves them.
-- Do not add catalog categories, brands, variants, SKUs, prices, inventory,
-  media, publication, search, Kafka, or Elasticsearch without explicit
-  approval.
+- Do not add Customer, Cart, Order, Notification, Gateway, Keycloak, Kafka,
+  Angular, Elasticsearch, or Cloudinary capabilities without an explicit active
+  task.

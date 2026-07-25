@@ -14,7 +14,7 @@
     <artifactId>catalog-service</artifactId>
 
     <name>Catalog Service</name>
-    <description>Golden service skeleton for catalog product draft management.</description>
+    <description>MVP catalog service for category, product, variant, stock, image URL, and browsing APIs.</description>
 
     <dependencies>
         <dependency>

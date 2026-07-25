@@ -10,7 +10,9 @@ These guidelines apply to synchronous HTTP APIs exposed by platform and business
 - Use JSON request and response bodies.
 - Use DTOs at API boundaries.
 - Do not expose JPA entities from controllers.
-- Document public service APIs with OpenAPI.
+- Document public service APIs with OpenAPI or repository API documentation.
+  Generated OpenAPI tooling should be added only after the build platform
+  centrally approves the dependency.
 
 ## Resource Naming
 
@@ -105,41 +107,105 @@ When idempotency keys are introduced, document:
 
 ## Current Catalog API
 
-The golden catalog service currently exposes a temporary unsecured draft-product API:
+Catalog Service exposes MVP catalog APIs for administrators and customers.
+Administrator APIs are temporarily unsecured until MVP Phase 2 adds Keycloak
+and role-based access.
 
-- `POST /api/v1/products`
-- `GET /api/v1/products/{productId}`
+Admin categories:
 
-This API is administrator-facing by intent, but authentication and
-authorization are not integrated until the security phase.
+- `POST /api/v1/admin/categories`
+- `PUT /api/v1/admin/categories/{categoryId}`
+- `GET /api/v1/admin/categories`
+- `GET /api/v1/admin/categories/{categoryId}`
 
-The MVP roadmap expands Catalog Service beyond this temporary foundation to
-cover categories, products, variants, SKU, price, stock, image URLs,
-activation status, browsing, filtering, pagination, and basic search.
+Admin products:
 
-Create request:
+- `POST /api/v1/admin/products`
+- `PUT /api/v1/admin/products/{productId}`
+- `GET /api/v1/admin/products`
+- `GET /api/v1/admin/products/{productId}`
+- `PATCH /api/v1/admin/products/{productId}/status`
 
-- `name`: required, trimmed, maximum 160 characters, blank values rejected.
-- `description`: optional, trimmed, maximum 2000 characters.
+Admin variants:
 
-Product response:
+- `POST /api/v1/admin/products/{productId}/variants`
+- `PUT /api/v1/admin/products/{productId}/variants/{variantId}`
+- `PATCH /api/v1/admin/products/{productId}/variants/{variantId}/stock`
+- `DELETE /api/v1/admin/products/{productId}/variants/{variantId}`
 
-- `id`
-- `name`
-- `description`
-- `status`
-- `createdAt`
-- `updatedAt`
-- `version`
+Admin images:
 
-Current status values:
+- `POST /api/v1/admin/products/{productId}/images`
+- `PUT /api/v1/admin/products/{productId}/images/{imageId}`
+- `DELETE /api/v1/admin/products/{productId}/images/{imageId}`
 
-- `DRAFT`
+Public catalog:
 
-Current explicit non-goals:
+- `GET /api/v1/categories`
+- `GET /api/v1/products`
+- `GET /api/v1/products/{productIdOrSlug}`
 
-- categories, brands, variants, SKUs, prices, inventory, media, publication,
-  search, and pagination are not part of the temporary draft-product
-  foundation. They become part of the MVP Catalog phase.
+Public product listing query parameters:
 
-Catalog service responses include `X-Correlation-ID`. Incoming values are accepted when valid and generated when absent or invalid.
+- `page`: zero-based page index, default `0`.
+- `size`: page size, default `20`, maximum `100`.
+- `sort`: `name`, `newest`, `priceAsc`, or `priceDesc`.
+- `search`: case-insensitive product-name contains search.
+- `category`: category ID or slug.
+- `brand`: case-insensitive exact brand filter.
+- `minPrice` and `maxPrice`: variant price range filters.
+- `inStockOnly`: when `true`, requires at least one active variant with stock.
+
+Paginated responses contain:
+
+- `content`
+- `page`
+- `size`
+- `totalElements`
+- `totalPages`
+- `first`
+- `last`
+
+Catalog rules:
+
+- Public APIs return only active categories, active products, and active variants.
+- Product statuses are `DRAFT`, `ACTIVE`, and `INACTIVE`.
+- A product cannot become `ACTIVE` unless it belongs to an active category and
+  has at least one active variant.
+- Variant SKU is globally unique.
+- Category and product slugs are unique.
+- Prices use `BigDecimal` and the single MVP currency `USD`.
+- Stock quantity cannot be negative and uses optimistic locking.
+- Variant hard delete is an MVP limitation while no cart/order capability
+  references variants.
+- Image URLs are supplied by administrators. Binary upload and Cloudinary
+  integration are out of scope for this phase.
+- Basic search uses PostgreSQL `lower(name) like ...`; Elasticsearch remains
+  post-MVP.
+
+Create product request example:
+
+```json
+{
+  "name": "Everyday Backpack",
+  "slug": "everyday-backpack",
+  "description": "A durable everyday bag.",
+  "categoryId": "11111111-1111-1111-1111-111111111111",
+  "brand": "RCP"
+}
+```
+
+Variant request example:
+
+```json
+{
+  "sku": "BAG-001-BLK",
+  "name": "Black",
+  "price": 49.99,
+  "stockQuantity": 25,
+  "active": true
+}
+```
+
+Catalog service responses include `X-Correlation-ID`. Incoming values are
+accepted when valid and generated when absent or invalid.

@@ -9,6 +9,8 @@ toward production quality after the MVP works end to end.
 
 ### MVP Phase 1 - Catalog
 
+Status: implemented for the backend Catalog Service.
+
 - Categories.
 - Product CRUD.
 - Product variants.
@@ -25,6 +27,14 @@ toward production quality after the MVP works end to end.
 
 Catalog Service owns inventory and image metadata for the MVP. Do not extract
 Inventory Service or Media Service before the MVP is complete.
+
+Current limitations:
+
+- Admin endpoints are temporarily unsecured until MVP Phase 2.
+- Image binary upload is not implemented; administrators provide image URLs.
+- Search uses PostgreSQL name matching; Elasticsearch remains post-MVP.
+- Variant hard delete is allowed until another MVP capability references
+  variants.
 
 ### MVP Phase 2 - Authentication and Customer
 

@@ -6,11 +6,11 @@ The backend will be implemented first with Java, Spring Boot, Spring Cloud, Mave
 
 ## Current Phase
 
-MVP roadmap alignment.
+MVP Phase 1 - Catalog Service.
 
 Java application code currently exists only in `services/catalog-service`.
-The Maven build foundation and catalog-service foundation are preserved while
-the repository roadmap is aligned around the complete MVP customer journey.
+The Maven build foundation is preserved while Catalog Service now supports
+administrator catalog management and public product browsing for the MVP.
 
 ## Build Foundation
 
@@ -53,16 +53,38 @@ Verify the build:
 
 ## Catalog Service
 
-`services/catalog-service` currently implements only a draft product capability:
+`services/catalog-service` implements the MVP Catalog Service using ports and
+adapters, Spring Boot, PostgreSQL, Flyway, JPA, and Testcontainers.
 
-- `POST /api/v1/products`
-- `GET /api/v1/products/{productId}`
+Implemented admin APIs are temporarily unsecured until the authentication phase:
 
-The endpoints are temporarily unsecured until the security phase. They exist to prove service structure, validation, error handling, persistence, Flyway migrations, testing, Docker packaging, and correlation ID behavior.
+- `POST /api/v1/admin/categories`
+- `PUT /api/v1/admin/categories/{categoryId}`
+- `GET /api/v1/admin/categories`
+- `GET /api/v1/admin/categories/{categoryId}`
+- `POST /api/v1/admin/products`
+- `PUT /api/v1/admin/products/{productId}`
+- `GET /api/v1/admin/products`
+- `GET /api/v1/admin/products/{productId}`
+- `PATCH /api/v1/admin/products/{productId}/status`
+- `POST /api/v1/admin/products/{productId}/variants`
+- `PUT /api/v1/admin/products/{productId}/variants/{variantId}`
+- `PATCH /api/v1/admin/products/{productId}/variants/{variantId}/stock`
+- `DELETE /api/v1/admin/products/{productId}/variants/{variantId}`
+- `POST /api/v1/admin/products/{productId}/images`
+- `PUT /api/v1/admin/products/{productId}/images/{imageId}`
+- `DELETE /api/v1/admin/products/{productId}/images/{imageId}`
 
-The MVP roadmap expands Catalog Service next to cover categories, products,
-variants, SKU, pricing, stock, image metadata, activation status, browsing,
-filtering, pagination, and basic search.
+Implemented public APIs:
+
+- `GET /api/v1/categories`
+- `GET /api/v1/products`
+- `GET /api/v1/products/{productIdOrSlug}`
+
+Public product listing supports page, size, sort, name search, category,
+brand, price range, and in-stock filters using PostgreSQL queries. The MVP
+currency is `USD`. Product image binary upload and external media SDKs are out
+of scope; administrators provide image URLs.
 
 ## Planned Repository Shape
 

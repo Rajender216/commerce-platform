@@ -1,7 +1,6 @@
 package com.rcp.commerce.catalog.adapter.out.persistence;
 
-import com.rcp.commerce.catalog.domain.ProductDescription;
-import com.rcp.commerce.catalog.domain.ProductName;
+import com.rcp.commerce.catalog.domain.Product;
 import com.rcp.commerce.catalog.domain.ProductStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,11 +20,20 @@ class JpaProductEntity {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "name", nullable = false, length = ProductName.MAX_LENGTH)
+    @Column(name = "name", nullable = false, length = Product.NAME_MAX_LENGTH)
     private String name;
 
-    @Column(name = "description", nullable = false, length = ProductDescription.MAX_LENGTH)
+    @Column(name = "slug", nullable = false, length = Product.SLUG_MAX_LENGTH)
+    private String slug;
+
+    @Column(name = "description", nullable = false, length = Product.DESCRIPTION_MAX_LENGTH)
     private String description;
+
+    @Column(name = "category_id", nullable = false)
+    private UUID categoryId;
+
+    @Column(name = "brand", nullable = false, length = Product.BRAND_MAX_LENGTH)
+    private String brand;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 32)
@@ -46,14 +54,20 @@ class JpaProductEntity {
     JpaProductEntity(
             UUID id,
             String name,
+            String slug,
             String description,
+            UUID categoryId,
+            String brand,
             ProductStatus status,
             Instant createdAt,
             Instant updatedAt,
             long version) {
         this.id = id;
         this.name = name;
+        this.slug = slug;
         this.description = description;
+        this.categoryId = categoryId;
+        this.brand = brand;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -68,8 +82,20 @@ class JpaProductEntity {
         return name;
     }
 
+    String getSlug() {
+        return slug;
+    }
+
     String getDescription() {
         return description;
+    }
+
+    UUID getCategoryId() {
+        return categoryId;
+    }
+
+    String getBrand() {
+        return brand;
     }
 
     ProductStatus getStatus() {
@@ -86,9 +112,5 @@ class JpaProductEntity {
 
     long getVersion() {
         return version;
-    }
-
-    void setName(String name) {
-        this.name = name;
     }
 }

@@ -6,21 +6,6 @@
 
 Current approved capability:
 
-- Create draft product.
-- Retrieve product by ID.
-
-Current product fields:
-
-- `id`
-- `name`
-- `description`
-- `status`
-- `createdAt`
-- `updatedAt`
-- `version`
-
-MVP ownership scope for Catalog Service:
-
 - Categories.
 - Products.
 - Product variants.
@@ -34,9 +19,19 @@ MVP ownership scope for Catalog Service:
 - Pagination.
 - Basic search.
 
-Current status:
+Current product statuses:
 
 - `DRAFT`
+- `ACTIVE`
+- `INACTIVE`
+
+MVP limitations:
+
+- Admin endpoints are temporarily unsecured until the authentication phase.
+- Product image upload is not owned here yet; administrators provide image URLs.
+- Search uses PostgreSQL queries rather than Elasticsearch.
+- Variant hard delete is allowed only while no cart/order capability references
+  variants.
 
 ## Non-Owned Responsibilities
 
@@ -71,7 +66,12 @@ until then.
 
 ## Database Ownership
 
-`catalog-service` owns the `products` table.
+`catalog-service` owns these tables:
+
+- `categories`
+- `products`
+- `product_variants`
+- `product_images`
 
 Rules:
 
@@ -85,11 +85,12 @@ Rules:
 
 Required test coverage for catalog changes:
 
-- Domain unit tests for product creation rules.
-- Application service unit tests for create and get behavior.
-- Product-not-found unit tests.
-- Web tests for create, validation, get, missing product, error shape, and correlation ID.
-- PostgreSQL Testcontainers integration tests for Flyway, persistence, mapping, optimistic locking, and database constraints.
+- Domain unit tests for category, product, variant, stock, status, and image rules.
+- Application service unit tests for use-case behavior and business conflicts.
+- Web tests for admin APIs, public browsing, validation, missing resources,
+  duplicate resources, error shape, and correlation ID.
+- PostgreSQL Testcontainers integration tests for Flyway, persistence, mapping,
+  optimistic locking, constraints, filtering, and pagination.
 
 ArchUnit is not currently approved in the build platform. Add architecture tests only after that tooling is centrally approved.
 

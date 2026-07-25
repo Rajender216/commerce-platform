@@ -65,7 +65,8 @@ Current Maven modules:
 
 - Root `pom.xml`: aggregator and parent build.
 - `build-platform`: POM-only build module with no application code.
-- `services/catalog-service`: current service foundation with draft product API.
+- `services/catalog-service`: current MVP Catalog Service with admin catalog
+  management and public browsing APIs.
 
 The root POM currently centralizes:
 

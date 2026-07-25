@@ -67,6 +67,8 @@ Current Maven modules:
 - `build-platform`: POM-only build module with no application code.
 - `services/catalog-service`: current MVP Catalog Service with admin catalog
   management and public browsing APIs.
+- `services/customer-service`: current MVP Customer Service with authenticated
+  profile and shipping-address APIs.
 
 The root POM currently centralizes:
 
@@ -120,17 +122,91 @@ Centralize plugin versions for:
 
 ## Local Development
 
-The local showcase phase may add Docker Compose when the approved MVP roadmap
-reaches that stage. Expected infrastructure services:
+Docker Compose exists for the current MVP backend slice:
 
-- PostgreSQL
-- Kafka
 - Keycloak
+- Keycloak PostgreSQL database
 - Mailpit
-- Optional Kafka UI
-- Optional database administration UI
+- Catalog PostgreSQL database
+- Customer PostgreSQL database
+- Catalog Service
+- Customer Service
 
-Local credentials must be development-only and documented. Real secrets must not be committed.
+Start authentication and databases:
+
+```powershell
+docker compose -f infrastructure/compose.yaml up -d keycloak keycloak-db mailpit catalog-db customer-db
+```
+
+Start the current services through Docker:
+
+```powershell
+docker compose -f infrastructure/compose.yaml up -d --build catalog-service customer-service
+```
+
+Useful local URLs:
+
+- Keycloak: `http://localhost:8081`
+- Keycloak realm: `commerce-mvp`
+- Mailpit: `http://localhost:8025`
+- Catalog Service: `http://localhost:8083`
+- Customer Service: `http://localhost:8082`
+
+Local-only demo credentials:
+
+- Admin: `admin@example.test` / `admin-local-pass`
+- Customer: `customer@example.test` / `customer-local-pass`
+
+Get a customer token:
+
+```powershell
+$customerToken = (Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8081/realms/commerce-mvp/protocol/openid-connect/token" `
+  -ContentType "application/x-www-form-urlencoded" `
+  -Body @{
+    grant_type = "password"
+    client_id = "commerce-web"
+    username = "customer@example.test"
+    password = "customer-local-pass"
+  }).access_token
+```
+
+Get an admin token:
+
+```powershell
+$adminToken = (Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8081/realms/commerce-mvp/protocol/openid-connect/token" `
+  -ContentType "application/x-www-form-urlencoded" `
+  -Body @{
+    grant_type = "password"
+    client_id = "commerce-web"
+    username = "admin@example.test"
+    password = "admin-local-pass"
+  }).access_token
+```
+
+Call Customer Service:
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://localhost:8082/api/v1/customers/me" `
+  -Headers @{ Authorization = "Bearer $customerToken" }
+```
+
+Mailpit receives Keycloak verification emails for newly registered users.
+Open `http://localhost:8025` to inspect messages and follow verification
+links.
+
+Google sign-in is prepared but disabled until real credentials are configured.
+Use this redirect URI in Google Console:
+
+```text
+http://localhost:8081/realms/commerce-mvp/broker/google/endpoint
+```
+
+Real secrets must not be committed. Local credentials are development-only.
 
 ## Branching
 
@@ -205,6 +281,19 @@ Catalog service verification:
 ```
 
 The catalog service verification runs unit tests, standalone MockMvc web tests, and PostgreSQL Testcontainers integration tests.
+
+Customer service verification:
+
+```powershell
+.\mvnw.cmd -pl services/customer-service -am clean verify
+```
+
+```sh
+./mvnw -pl services/customer-service -am clean verify
+```
+
+The customer service verification runs unit tests, security/MVC tests, and
+PostgreSQL Testcontainers integration tests.
 
 ## Prohibited In Early Phases
 

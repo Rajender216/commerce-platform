@@ -2,7 +2,7 @@
 
 ## Identity Provider
 
-Keycloak is the planned identity provider for OAuth 2.0 and OpenID Connect.
+Keycloak is the identity provider for OAuth 2.0 and OpenID Connect in the MVP.
 
 Required capabilities:
 
@@ -33,10 +33,13 @@ Initial roles:
 - `ADMIN`
 
 Administrative operations, such as category, product, and catalog data
-management, require administrator authorization once authentication is active.
+management, require the `ADMIN` role.
 
-Temporary unsecured endpoints are acceptable only when a phase explicitly
-documents them as a short-lived foundation step.
+Public catalog browsing endpoints remain anonymous.
+
+Customer profile and address endpoints require a valid authenticated customer
+token. Customer Service derives the customer identity from the validated JWT
+`sub` claim, not from request headers or path parameters.
 
 ## Tokens
 
@@ -55,6 +58,13 @@ Token validation must verify:
 
 Services must reject tokens from unexpected realms, clients, issuers, or audiences.
 
+Current local issuer:
+
+- `http://localhost:8081/realms/commerce-mvp`
+
+Services map Keycloak realm/client roles to Spring Security authorities with
+the `ROLE_` prefix where service-specific authorization needs it.
+
 ## Secrets
 
 Real secrets must not be committed.
@@ -62,6 +72,11 @@ Real secrets must not be committed.
 Local development may use documented placeholder credentials for Docker Compose services. Production-like secrets should be supplied through environment variables or a secret management system.
 
 Development credentials must be clearly marked as local-only. Do not reuse local Keycloak realms, clients, or secrets as production-ready configuration.
+
+Local-only demo users:
+
+- `admin@example.test` / `admin-local-pass`
+- `customer@example.test` / `customer-local-pass`
 
 ## Service Boundaries
 
@@ -72,6 +87,32 @@ Security boundaries must align with service ownership:
 - Sensitive business operations should be auditable.
 
 Customer profile data is a commerce concern. Passwords, identity credentials, social login links, verification status, and reset flows are identity-provider concerns unless a later ADR defines a different boundary.
+
+Customer Service must never store passwords, password hashes, refresh tokens,
+Google access tokens, or OTP values.
+
+## Local Keycloak
+
+Local startup uses `infrastructure/compose.yaml` and imports
+`infrastructure/keycloak/realm-commerce-mvp.json`.
+
+The realm includes:
+
+- roles: `CUSTOMER`, `ADMIN`
+- public frontend client: `commerce-web`
+- backend resource API client: `commerce-backend`
+- Mailpit SMTP settings for verification emails
+- disabled Google identity provider with placeholder client values
+
+Google Console redirect URI:
+
+```text
+http://localhost:8081/realms/commerce-mvp/broker/google/endpoint
+```
+
+Do not commit real Google client IDs or secrets. Configure them in Keycloak
+locally or through environment-specific configuration before enabling the
+Google identity provider.
 
 ## API Security
 

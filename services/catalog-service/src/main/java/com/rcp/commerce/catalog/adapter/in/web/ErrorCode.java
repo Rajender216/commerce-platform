@@ -1,6 +1,8 @@
 package com.rcp.commerce.catalog.adapter.in.web;
 
 enum ErrorCode {
+    UNAUTHORIZED,
+    FORBIDDEN,
     VALIDATION_FAILED,
     CATEGORY_NOT_FOUND,
     PRODUCT_NOT_FOUND,

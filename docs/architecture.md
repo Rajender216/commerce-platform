@@ -67,6 +67,12 @@ PostgreSQL is the initial source of truth. For the MVP, Catalog Service owns
 categories, products, variants, SKU, price, stock, image metadata, activation
 status, and product browsing/search behavior.
 
+Customer Service owns customer profile records, shipping addresses, and the
+mapping from Keycloak `sub` to a local customer profile. Keycloak owns
+credentials, email verification, social identity-provider links, access tokens,
+refresh tokens, and roles. Customer Service must not store passwords, password
+hashes, refresh tokens, Google access tokens, or OTP values.
+
 Elasticsearch is deferred until the core purchase flow works and search needs
 justify the added complexity.
 
@@ -131,6 +137,9 @@ Service discovery is part of the MVP roadmap and may be introduced when its
 phase is active. Do not create platform modules before they are approved.
 
 Observability is planned for a later phase.
+
+During MVP Phase 2, there is no API Gateway yet. Catalog Service and Customer
+Service validate Keycloak JWTs directly as resource servers.
 
 ## Decisions Requiring Confirmation
 

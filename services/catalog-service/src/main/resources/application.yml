@@ -16,6 +16,12 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${CATALOG_SECURITY_ISSUER_URI:http://localhost:8081/realms/commerce-mvp}
+          jwk-set-uri: ${CATALOG_SECURITY_JWK_SET_URI:http://localhost:8081/realms/commerce-mvp/protocol/openid-connect/certs}
 
 catalog:
   correlation:

@@ -21,6 +21,8 @@ For implementation tasks:
 - No secrets or real credentials are committed.
 - Documentation is updated when behavior, architecture, setup, or operations change.
 - ADRs are added for major architecture decisions.
+- Security-sensitive MVP tasks document public and protected endpoints, local
+  token testing, and any local-only credentials.
 
 ## Backend Requirements
 
@@ -31,6 +33,8 @@ For implementation tasks:
 - Cross-service database transactions are not introduced.
 - Events are idempotent where consumed.
 - REST APIs use DTOs and consistent error responses.
+- Protected services validate JWTs directly until the API Gateway phase is
+  implemented.
 
 ## Testing Requirements
 

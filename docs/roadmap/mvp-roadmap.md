@@ -30,7 +30,7 @@ Inventory Service or Media Service before the MVP is complete.
 
 Current limitations:
 
-- Admin endpoints are temporarily unsecured until MVP Phase 2.
+- Admin endpoints now require a valid Keycloak JWT with `ADMIN`.
 - Image binary upload is not implemented; administrators provide image URLs.
 - Search uses PostgreSQL name matching; Elasticsearch remains post-MVP.
 - Variant hard delete is allowed until another MVP capability references
@@ -38,12 +38,24 @@ Current limitations:
 
 ### MVP Phase 2 - Authentication and Customer
 
+Status: implemented for local Keycloak infrastructure and backend Customer
+Service APIs.
+
 - Keycloak.
 - Email and password authentication.
-- Google sign-in.
+- Email verification configuration through Mailpit.
+- Google sign-in placeholders and documentation.
 - `ADMIN` and `CUSTOMER` roles.
 - Customer profile.
 - Shipping addresses.
+
+Current limitations:
+
+- Google sign-in requires real Google Console credentials before it can be
+  enabled.
+- Demo users use local-only passwords and must not be reused outside local
+  development.
+- No API Gateway yet; protected backend services validate JWTs directly.
 
 ### MVP Phase 3 - Gateway and Discovery
 

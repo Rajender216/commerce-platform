@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-MVP Phase 1 - Catalog Service.
+MVP Phase 2 - Authentication and Customer Service.
 
 ## Repository State
 
@@ -16,9 +16,14 @@ Current repository contents:
 - `build-platform` POM-only module
 - Build verification scripts
 - `services/catalog-service` MVP catalog implementation
+- `services/customer-service` MVP customer implementation
+- Keycloak, Mailpit, and PostgreSQL local infrastructure in
+  `infrastructure/compose.yaml`
+- Keycloak realm import in `infrastructure/keycloak/realm-commerce-mvp.json`
 - Active MVP roadmap documentation
 
-Application code exists only in `services/catalog-service`.
+Application code exists in `services/catalog-service` and
+`services/customer-service`.
 
 ## Completed
 
@@ -39,26 +44,35 @@ Application code exists only in `services/catalog-service`.
 - Correlation ID filter implemented.
 - PostgreSQL/Flyway/JPA persistence path implemented.
 - Catalog unit, web, and PostgreSQL Testcontainers tests added.
+- Keycloak local infrastructure added with `CUSTOMER` and `ADMIN` roles,
+  backend and future frontend clients, demo users, Mailpit SMTP settings, and
+  Google identity-provider placeholders.
+- Catalog admin APIs protected by JWT validation and `ADMIN` authorization.
+- Catalog public browsing APIs remain anonymous.
+- Customer service added to the Maven reactor.
+- Customer profile and shipping-address APIs implemented.
+- Lazy idempotent customer profile creation from JWT claims implemented.
+- Customer service PostgreSQL/Flyway/JPA persistence path implemented.
+- Customer unit, security/MVC, and PostgreSQL Testcontainers tests added.
 - Repository roadmap alignment updated for the MVP customer journey.
 
 ## Not Started
 
-- MVP service rollout beyond Catalog Service.
 - Gateway and discovery.
-- Customer, Cart, Order, and Notification services.
+- Cart, Order, and Notification services.
 - Angular frontend.
-- Local showcase stack.
+- Full local showcase sample data and walkthrough.
 
 ## Next Recommended Phase
 
-Next recommended work is MVP Phase 2: Authentication and Customer.
+Next recommended work is MVP Phase 3: Gateway and Discovery.
 
 Production-maturity work remains post-MVP unless explicitly approved.
 
 Possible post-MVP follow-ups:
 
 - GitHub Actions CI skeleton.
-- Docker Compose local showcase stack.
+- Local showcase sample data and walkthrough.
 - Build-platform approval for ArchUnit.
 - Advanced monitoring and resilience.
 - Elasticsearch, Redis, Kubernetes, and service mesh.
@@ -71,6 +85,6 @@ Possible post-MVP follow-ups:
 - Do not commit or push without explicit approval.
 - Do not create discovery, gateway, or config-server modules unless the active
   task explicitly approves them.
-- Do not add Customer, Cart, Order, Notification, Gateway, Keycloak, Kafka,
-  Angular, Elasticsearch, or Cloudinary capabilities without an explicit active
-  task.
+- Do not add Cart, Order, Notification, Gateway, Kafka, Angular,
+  Elasticsearch, Redis, Cloudinary, or payment capabilities without an explicit
+  active task.

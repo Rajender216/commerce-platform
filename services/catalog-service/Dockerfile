@@ -9,8 +9,10 @@ COPY mvnw.cmd mvnw.cmd
 COPY pom.xml pom.xml
 COPY build-platform/pom.xml build-platform/pom.xml
 COPY services/catalog-service/pom.xml services/catalog-service/pom.xml
+COPY services/customer-service/pom.xml services/customer-service/pom.xml
 COPY services/catalog-service/src services/catalog-service/src
 
+RUN chmod +x mvnw
 RUN ./mvnw -pl services/catalog-service -am -DskipTests package
 
 FROM eclipse-temurin:21-jre

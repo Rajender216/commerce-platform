@@ -1,0 +1,120 @@
+services:
+  catalog-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: catalog_service
+      POSTGRES_USER: catalog_service
+      POSTGRES_PASSWORD: ${CATALOG_DB_PASSWORD:-catalog-local-pass}
+    ports:
+      - "5433:5432"
+    volumes:
+      - catalog-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalog_service -d catalog_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  customer-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: customer_service
+      POSTGRES_USER: customer_service
+      POSTGRES_PASSWORD: ${CUSTOMER_DB_PASSWORD:-customer-local-pass}
+    ports:
+      - "5434:5432"
+    volumes:
+      - customer-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U customer_service -d customer_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  keycloak-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak-local-pass}
+    ports:
+      - "5435:5432"
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak-local-pass}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin-local-pass}
+      KC_HOSTNAME: localhost
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/realm-commerce-mvp.json:/opt/keycloak/data/import/realm-commerce-mvp.json:ro
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  catalog-service:
+    build:
+      context: ..
+      dockerfile: services/catalog-service/Dockerfile
+    environment:
+      SERVER_PORT: 8080
+      CATALOG_DATASOURCE_URL: jdbc:postgresql://catalog-db:5432/catalog_service
+      CATALOG_DATASOURCE_USERNAME: catalog_service
+      CATALOG_DATASOURCE_PASSWORD: ${CATALOG_DB_PASSWORD:-catalog-local-pass}
+      CATALOG_SECURITY_ISSUER_URI: http://localhost:8081/realms/commerce-mvp
+      CATALOG_SECURITY_JWK_SET_URI: http://keycloak:8080/realms/commerce-mvp/protocol/openid-connect/certs
+    ports:
+      - "8083:8080"
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  customer-service:
+    build:
+      context: ..
+      dockerfile: services/customer-service/Dockerfile
+    environment:
+      SERVER_PORT: 8082
+      CUSTOMER_DATASOURCE_URL: jdbc:postgresql://customer-db:5432/customer_service
+      CUSTOMER_DATASOURCE_USERNAME: customer_service
+      CUSTOMER_DATASOURCE_PASSWORD: ${CUSTOMER_DB_PASSWORD:-customer-local-pass}
+      CUSTOMER_SECURITY_ISSUER_URI: http://localhost:8081/realms/commerce-mvp
+      CUSTOMER_SECURITY_JWK_SET_URI: http://keycloak:8080/realms/commerce-mvp/protocol/openid-connect/certs
+    ports:
+      - "8082:8082"
+    depends_on:
+      customer-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+volumes:
+  catalog-db-data:
+  customer-db-data:
+  keycloak-db-data:

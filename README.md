@@ -6,11 +6,11 @@ The backend will be implemented first with Java, Spring Boot, Spring Cloud, Mave
 
 ## Current Phase
 
-MVP Phase 1 - Catalog Service.
+MVP Phase 2 - Authentication and Customer Service.
 
-Java application code currently exists only in `services/catalog-service`.
-The Maven build foundation is preserved while Catalog Service now supports
-administrator catalog management and public product browsing for the MVP.
+The Maven build foundation is preserved. Catalog Service supports
+administrator catalog management and public product browsing, and Customer
+Service supports authenticated customer profiles and shipping addresses.
 
 ## Build Foundation
 
@@ -22,11 +22,13 @@ Implemented Maven modules:
 ├── build-platform
 │   └── pom.xml
 └── services
-    └── catalog-service
+    ├── catalog-service
+    │   └── pom.xml
+    └── customer-service
         └── pom.xml
 ```
 
-The root POM is the aggregator and parent. `build-platform` is a POM-only module used to validate inherited build policy without adding runtime code. `catalog-service` is the current service foundation for the MVP roadmap.
+The root POM is the aggregator and parent. `build-platform` is a POM-only module used to validate inherited build policy without adding runtime code. `catalog-service` and `customer-service` are the current MVP service modules.
 
 Selected versions:
 
@@ -43,12 +45,14 @@ Verify the build:
 .\mvnw.cmd clean verify
 .\scripts\verify.ps1
 .\mvnw.cmd -pl services/catalog-service -am clean verify
+.\mvnw.cmd -pl services/customer-service -am clean verify
 ```
 
 ```sh
 ./mvnw clean verify
 ./scripts/verify.sh
 ./mvnw -pl services/catalog-service -am clean verify
+./mvnw -pl services/customer-service -am clean verify
 ```
 
 ## Catalog Service
@@ -56,7 +60,7 @@ Verify the build:
 `services/catalog-service` implements the MVP Catalog Service using ports and
 adapters, Spring Boot, PostgreSQL, Flyway, JPA, and Testcontainers.
 
-Implemented admin APIs are temporarily unsecured until the authentication phase:
+Implemented admin APIs require a valid Keycloak JWT with the `ADMIN` role:
 
 - `POST /api/v1/admin/categories`
 - `PUT /api/v1/admin/categories/{categoryId}`
@@ -85,6 +89,45 @@ Public product listing supports page, size, sort, name search, category,
 brand, price range, and in-stock filters using PostgreSQL queries. The MVP
 currency is `USD`. Product image binary upload and external media SDKs are out
 of scope; administrators provide image URLs.
+
+## Authentication and Customer Service
+
+Local authentication uses Keycloak realm `commerce-mvp`.
+
+Current local endpoints:
+
+- Keycloak: `http://localhost:8081`
+- Mailpit UI: `http://localhost:8025`
+- Catalog Service: `http://localhost:8083`
+- Customer Service: `http://localhost:8082`
+
+Customer APIs require authentication:
+
+- `GET /api/v1/customers/me`
+- `PUT /api/v1/customers/me`
+- `POST /api/v1/customers/me/addresses`
+- `GET /api/v1/customers/me/addresses`
+- `GET /api/v1/customers/me/addresses/{addressId}`
+- `PUT /api/v1/customers/me/addresses/{addressId}`
+- `DELETE /api/v1/customers/me/addresses/{addressId}`
+- `PATCH /api/v1/customers/me/addresses/{addressId}/default`
+
+Demo users for local development:
+
+- Admin: `admin@example.test` / `admin-local-pass`
+- Customer: `customer@example.test` / `customer-local-pass`
+
+Start local authentication and databases:
+
+```powershell
+docker compose -f infrastructure/compose.yaml up -d keycloak keycloak-db mailpit catalog-db customer-db
+```
+
+Build and start the current local services through Compose:
+
+```powershell
+docker compose -f infrastructure/compose.yaml up -d --build catalog-service customer-service
+```
 
 ## Planned Repository Shape
 

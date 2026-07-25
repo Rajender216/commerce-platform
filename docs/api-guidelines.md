@@ -108,8 +108,7 @@ When idempotency keys are introduced, document:
 ## Current Catalog API
 
 Catalog Service exposes MVP catalog APIs for administrators and customers.
-Administrator APIs are temporarily unsecured until MVP Phase 2 adds Keycloak
-and role-based access.
+Administrator APIs require a valid Keycloak JWT with the `ADMIN` role.
 
 Admin categories:
 
@@ -208,4 +207,64 @@ Variant request example:
 ```
 
 Catalog service responses include `X-Correlation-ID`. Incoming values are
+accepted when valid and generated when absent or invalid.
+
+## Current Customer API
+
+Customer Service exposes authenticated MVP profile and shipping-address APIs.
+All routes require a valid Keycloak JWT. Customer identity is resolved from the
+validated JWT `sub` claim.
+
+Profile:
+
+- `GET /api/v1/customers/me`
+- `PUT /api/v1/customers/me`
+
+Addresses:
+
+- `POST /api/v1/customers/me/addresses`
+- `GET /api/v1/customers/me/addresses`
+- `GET /api/v1/customers/me/addresses/{addressId}`
+- `PUT /api/v1/customers/me/addresses/{addressId}`
+- `DELETE /api/v1/customers/me/addresses/{addressId}`
+- `PATCH /api/v1/customers/me/addresses/{addressId}/default`
+
+Customer rules:
+
+- Customer Service stores profile and address data only.
+- Keycloak owns credentials, verification, Google sign-in, tokens, and roles.
+- Profile creation is lazy and idempotent on first authenticated
+  `/customers/me` request.
+- Missing first or last name claims are stored as MVP placeholder values until
+  the customer updates the profile.
+- Only one shipping address may be default for a customer.
+- Deleting a default address does not automatically promote another address.
+
+Update profile request example:
+
+```json
+{
+  "firstName": "Ada",
+  "lastName": "Lovelace",
+  "phoneNumber": "+15550101010"
+}
+```
+
+Address request example:
+
+```json
+{
+  "recipientName": "Ada Lovelace",
+  "phoneNumber": "+15550101010",
+  "addressLine1": "1 Market Street",
+  "addressLine2": "Suite 100",
+  "city": "San Francisco",
+  "state": "CA",
+  "postalCode": "94105",
+  "country": "US",
+  "defaultAddress": true
+}
+```
+
+Customer service responses include `X-Correlation-ID`. Incoming values are
 accepted when valid and generated when absent or invalid.

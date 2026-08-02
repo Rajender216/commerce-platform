@@ -55,15 +55,29 @@ Current limitations:
   enabled.
 - Demo users use local-only passwords and must not be reused outside local
   development.
-- No API Gateway yet; protected backend services validate JWTs directly.
+- Protected backend services validate JWTs directly even when traffic enters
+  through the API Gateway.
 
 ### MVP Phase 3 - Gateway and Discovery
+
+Status: implemented for the current Catalog and Customer backend services.
 
 - API Gateway.
 - Eureka.
 - Routing.
 - JWT validation.
 - CORS.
+- Correlation-ID propagation.
+- Gateway Problem Details-style edge errors.
+- Docker Compose local startup.
+
+Current limitations:
+
+- Routes exist only for current Catalog and Customer APIs.
+- Advanced resilience, retries, rate limiting, distributed tracing, and
+  production reverse-proxy hardening are post-MVP.
+- Gateway host port defaults to `8080` and may be overridden with
+  `API_GATEWAY_HOST_PORT` for local port conflicts.
 
 Configuration Server is optional for the MVP and must not block progress.
 

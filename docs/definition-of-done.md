@@ -33,8 +33,8 @@ For implementation tasks:
 - Cross-service database transactions are not introduced.
 - Events are idempotent where consumed.
 - REST APIs use DTOs and consistent error responses.
-- Protected services validate JWTs directly until the API Gateway phase is
-  implemented.
+- Protected services validate JWTs directly. The API Gateway may validate and
+  authorize at the edge, but it must not become the only security boundary.
 
 ## Testing Requirements
 

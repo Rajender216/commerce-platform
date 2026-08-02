@@ -6,11 +6,12 @@ The backend will be implemented first with Java, Spring Boot, Spring Cloud, Mave
 
 ## Current Phase
 
-MVP Phase 2 - Authentication and Customer Service.
+MVP Phase 3 - API Gateway and Eureka Service Discovery.
 
 The Maven build foundation is preserved. Catalog Service supports
-administrator catalog management and public product browsing, and Customer
-Service supports authenticated customer profiles and shipping addresses.
+administrator catalog management and public product browsing, Customer Service
+supports authenticated customer profiles and shipping addresses, and API
+Gateway is the public backend entry point for the current MVP services.
 
 ## Build Foundation
 
@@ -28,7 +29,7 @@ Implemented Maven modules:
         └── pom.xml
 ```
 
-The root POM is the aggregator and parent. `build-platform` is a POM-only module used to validate inherited build policy without adding runtime code. `catalog-service` and `customer-service` are the current MVP service modules.
+The root POM is the aggregator and parent. `build-platform` is a POM-only module used to validate inherited build policy without adding runtime code. `discovery-server` and `api-gateway` are platform modules. `catalog-service` and `customer-service` are the current MVP service modules.
 
 Selected versions:
 
@@ -44,6 +45,8 @@ Verify the build:
 ```powershell
 .\mvnw.cmd clean verify
 .\scripts\verify.ps1
+.\mvnw.cmd -pl platform/discovery-server -am clean verify
+.\mvnw.cmd -pl platform/api-gateway -am clean verify
 .\mvnw.cmd -pl services/catalog-service -am clean verify
 .\mvnw.cmd -pl services/customer-service -am clean verify
 ```
@@ -51,6 +54,8 @@ Verify the build:
 ```sh
 ./mvnw clean verify
 ./scripts/verify.sh
+./mvnw -pl platform/discovery-server -am clean verify
+./mvnw -pl platform/api-gateway -am clean verify
 ./mvnw -pl services/catalog-service -am clean verify
 ./mvnw -pl services/customer-service -am clean verify
 ```
@@ -96,10 +101,15 @@ Local authentication uses Keycloak realm `commerce-mvp`.
 
 Current local endpoints:
 
+- API Gateway: `http://localhost:8080`
+- Eureka Dashboard: `http://localhost:8761`
 - Keycloak: `http://localhost:8081`
 - Mailpit UI: `http://localhost:8025`
 - Catalog Service: `http://localhost:8083`
 - Customer Service: `http://localhost:8082`
+
+The Gateway is the preferred public backend entry point. Direct service ports
+remain exposed locally for development and troubleshooting.
 
 Customer APIs require authentication:
 
@@ -126,7 +136,29 @@ docker compose -f infrastructure/compose.yaml up -d keycloak keycloak-db mailpit
 Build and start the current local services through Compose:
 
 ```powershell
-docker compose -f infrastructure/compose.yaml up -d --build catalog-service customer-service
+docker compose -f infrastructure/compose.yaml up -d --build discovery-server catalog-service customer-service api-gateway
+```
+
+If host port `8080` is already occupied, override the Gateway host port:
+
+```powershell
+$env:API_GATEWAY_HOST_PORT = "8084"
+docker compose -f infrastructure/compose.yaml up -d --build api-gateway
+```
+
+Gateway route table:
+
+- `GET /api/v1/categories` -> Catalog Service, anonymous.
+- `GET /api/v1/products` and `GET /api/v1/products/**` -> Catalog Service,
+  anonymous.
+- `/api/v1/admin/categories/**` and `/api/v1/admin/products/**` -> Catalog
+  Service, `ADMIN` required.
+- `/api/v1/customers/**` -> Customer Service, authentication required.
+
+Run the local Gateway smoke test after the Compose stack is healthy:
+
+```powershell
+.\scripts\smoke-gateway.ps1
 ```
 
 ## Planned Repository Shape

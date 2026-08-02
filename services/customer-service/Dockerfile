@@ -6,6 +6,8 @@ COPY mvnw mvnw
 COPY mvnw.cmd mvnw.cmd
 COPY pom.xml pom.xml
 COPY build-platform/pom.xml build-platform/pom.xml
+COPY platform/discovery-server/pom.xml platform/discovery-server/pom.xml
+COPY platform/api-gateway/pom.xml platform/api-gateway/pom.xml
 COPY services/catalog-service/pom.xml services/catalog-service/pom.xml
 COPY services/customer-service/pom.xml services/customer-service/pom.xml
 COPY services/customer-service/src services/customer-service/src

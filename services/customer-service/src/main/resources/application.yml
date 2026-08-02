@@ -28,6 +28,17 @@ customer:
     header-name: X-Correlation-ID
     max-length: 128
 
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    metadata-map:
+      management.context-path: /actuator
+
 management:
   endpoints:
     web:

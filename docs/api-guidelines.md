@@ -268,3 +268,29 @@ Address request example:
 
 Customer service responses include `X-Correlation-ID`. Incoming values are
 accepted when valid and generated when absent or invalid.
+
+## Current Gateway Routes
+
+The API Gateway is the preferred public backend entry point for current MVP
+services.
+
+Gateway URL:
+
+- `http://localhost:8080`
+
+Routes:
+
+- `GET /api/v1/categories` -> Catalog Service, anonymous.
+- `GET /api/v1/products` -> Catalog Service, anonymous.
+- `GET /api/v1/products/{productIdOrSlug}` -> Catalog Service, anonymous.
+- `/api/v1/admin/categories/**` -> Catalog Service, `ADMIN` required.
+- `/api/v1/admin/products/**` -> Catalog Service, `ADMIN` required.
+- `/api/v1/customers/**` -> Customer Service, authenticated JWT required.
+
+The Gateway forwards the original bearer token to downstream services. Do not
+use trusted identity headers instead of JWT validation.
+
+Gateway responses include `X-Correlation-ID`; incoming values are accepted when
+valid and generated when absent or invalid. CORS defaults to
+`http://localhost:4200` and can be overridden with
+`API_GATEWAY_CORS_ALLOWED_ORIGINS`.

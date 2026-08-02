@@ -41,6 +41,17 @@ Customer profile and address endpoints require a valid authenticated customer
 token. Customer Service derives the customer identity from the validated JWT
 `sub` claim, not from request headers or path parameters.
 
+The API Gateway also validates JWTs for protected routes and applies route
+authorization:
+
+- Catalog public browsing routes are anonymous.
+- Catalog admin routes require `ADMIN`.
+- Customer routes require authentication.
+
+Catalog Service and Customer Service continue validating JWTs independently.
+The Gateway must forward the original bearer token and must not replace it with
+trusted identity headers.
+
 ## Tokens
 
 Services should validate access tokens and use claims for authorization decisions.
@@ -64,6 +75,27 @@ Current local issuer:
 
 Services map Keycloak realm/client roles to Spring Security authorities with
 the `ROLE_` prefix where service-specific authorization needs it.
+
+Gateway and services use the same role mapping convention for Keycloak
+realm/client roles.
+
+## Gateway Edge Security
+
+The Gateway returns sanitized Problem Details-style responses for edge failures
+such as missing tokens, forbidden routes, unknown routes, service unavailable,
+and gateway timeout. It must not expose stack traces, Java exception names,
+Keycloak internals, Reactor internals, or internal service hostnames.
+
+Gateway CORS defaults to `http://localhost:4200` for the future Angular
+frontend. Override allowed origins with `API_GATEWAY_CORS_ALLOWED_ORIGINS`.
+Do not use wildcard origins with credentials.
+
+The correlation header is `X-Correlation-ID`. The Gateway validates length and
+simple characters, generates a UUID when absent or invalid, returns the value,
+and forwards exactly one correlation header downstream.
+
+Forwarded-header handling is enabled for the local MVP stack. A production
+reverse proxy must define which proxy-provided forwarding headers are trusted.
 
 ## Secrets
 

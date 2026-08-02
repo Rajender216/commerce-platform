@@ -133,18 +133,32 @@ Initial platform components:
 
 Configuration Server is optional for the MVP and must not block progress.
 
-Service discovery is part of the MVP roadmap and may be introduced when its
-phase is active. Do not create platform modules before they are approved.
-
 Observability is planned for a later phase.
 
-During MVP Phase 2, there is no API Gateway yet. Catalog Service and Customer
-Service validate Keycloak JWTs directly as resource servers.
+During MVP Phase 3, the API Gateway is the external backend entry point and
+routes through Eureka. Catalog Service and Customer Service still validate
+Keycloak JWTs directly as resource servers; the Gateway is not the only
+security boundary.
+
+Current Gateway routes:
+
+- `GET /api/v1/categories` -> `catalog-service`, anonymous.
+- `GET /api/v1/products` and `GET /api/v1/products/**` -> `catalog-service`,
+  anonymous.
+- `/api/v1/admin/categories/**` and `/api/v1/admin/products/**` ->
+  `catalog-service`, `ADMIN` required.
+- `/api/v1/customers/**` -> `customer-service`, authentication required.
+
+Future service routes must be added only when the target service exists.
+Avoid broad `/api/v1/admin/**` routing to a single service because future admin
+APIs will belong to different service owners.
+
+The Gateway forwards the original bearer token and the single documented
+`X-Correlation-ID` header. Downstream services must not treat custom identity
+headers as trusted authorization data.
 
 ## Decisions Requiring Confirmation
 
 - Dedicated database versus schema-per-service for local development.
-- API Gateway implementation details.
-- Service discovery timing and implementation.
 - Kafka schema governance and topic naming.
 - Whether schema registry should be added later.

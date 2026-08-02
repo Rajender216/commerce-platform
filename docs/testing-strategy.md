@@ -55,6 +55,15 @@ The catalog golden service establishes the current convention:
 - Web adapter tests may use standalone MockMvc when a focused controller/filter/exception-handler test is enough.
 - PostgreSQL integration tests must use Testcontainers, Flyway, and the real PostgreSQL driver.
 
+The Gateway phase establishes these additional conventions:
+
+- Discovery Server context/configuration tests use `*Test` naming and run under Surefire.
+- Gateway route and security tests may use an in-process mocked downstream HTTP
+  server or a service-discovery no-instance route instead of Docker.
+- Gateway tests should cover public routes, authenticated routes, admin
+  authorization, token forwarding, correlation ID behavior, CORS preflight, and
+  safe route/service-unavailable errors.
+
 ArchUnit is not currently approved or centrally managed in the build platform. Architecture tests are a required build-platform follow-up before adding ArchUnit rules.
 
 ## Contract Tests

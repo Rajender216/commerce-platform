@@ -65,6 +65,8 @@ Current Maven modules:
 
 - Root `pom.xml`: aggregator and parent build.
 - `build-platform`: POM-only build module with no application code.
+- `platform/discovery-server`: Eureka registry for local MVP service discovery.
+- `platform/api-gateway`: reactive Spring Cloud Gateway edge entry point.
 - `services/catalog-service`: current MVP Catalog Service with admin catalog
   management and public browsing APIs.
 - `services/customer-service`: current MVP Customer Service with authenticated
@@ -124,6 +126,8 @@ Centralize plugin versions for:
 
 Docker Compose exists for the current MVP backend slice:
 
+- Eureka Discovery Server
+- API Gateway
 - Keycloak
 - Keycloak PostgreSQL database
 - Mailpit
@@ -135,22 +139,32 @@ Docker Compose exists for the current MVP backend slice:
 Start authentication and databases:
 
 ```powershell
-docker compose -f infrastructure/compose.yaml up -d keycloak keycloak-db mailpit catalog-db customer-db
+docker compose -f infrastructure/compose.yaml up -d keycloak keycloak-db mailpit catalog-db customer-db discovery-server
 ```
 
-Start the current services through Docker:
+Start the current services and Gateway through Docker:
 
 ```powershell
-docker compose -f infrastructure/compose.yaml up -d --build catalog-service customer-service
+docker compose -f infrastructure/compose.yaml up -d --build catalog-service customer-service api-gateway
 ```
 
 Useful local URLs:
 
 - Keycloak: `http://localhost:8081`
 - Keycloak realm: `commerce-mvp`
+- Eureka Dashboard: `http://localhost:8761`
+- API Gateway: `http://localhost:8080`
 - Mailpit: `http://localhost:8025`
 - Catalog Service: `http://localhost:8083`
 - Customer Service: `http://localhost:8082`
+
+If host port `8080` is already occupied:
+
+```powershell
+$env:API_GATEWAY_HOST_PORT = "8084"
+docker compose -f infrastructure/compose.yaml up -d --build api-gateway
+.\scripts\smoke-gateway.ps1 -GatewayUrl "http://localhost:8084"
+```
 
 Local-only demo credentials:
 
@@ -191,8 +205,14 @@ Call Customer Service:
 
 ```powershell
 Invoke-RestMethod `
-  -Uri "http://localhost:8082/api/v1/customers/me" `
+  -Uri "http://localhost:8080/api/v1/customers/me" `
   -Headers @{ Authorization = "Bearer $customerToken" }
+```
+
+Run the Gateway smoke test:
+
+```powershell
+.\scripts\smoke-gateway.ps1
 ```
 
 Mailpit receives Keycloak verification emails for newly registered users.
@@ -295,6 +315,21 @@ Customer service verification:
 The customer service verification runs unit tests, security/MVC tests, and
 PostgreSQL Testcontainers integration tests.
 
+Discovery Server verification:
+
+```powershell
+.\mvnw.cmd -pl platform/discovery-server -am clean verify
+```
+
+API Gateway verification:
+
+```powershell
+.\mvnw.cmd -pl platform/api-gateway -am clean verify
+```
+
+The Gateway verification runs focused route, authorization, role mapping,
+correlation-ID, CORS, downstream pass-through, and service-unavailable tests.
+
 ## Prohibited In Early Phases
 
 - Do not create all services at once.
@@ -302,7 +337,6 @@ PostgreSQL Testcontainers integration tests.
 - Do not introduce Elasticsearch before PostgreSQL search is proven insufficient.
 - Do not put provider SDK usage inside domain or application logic.
 - Do not return persistence entities from controllers.
-- Do not create platform service skeletons unless the active task explicitly approves them.
-- Do not create service discovery until the active MVP phase explicitly requires it.
+- Do not create additional platform service skeletons unless the active task explicitly approves them.
 - Do not extract shared libraries prematurely.
 - Do not spend time on production hardening before the MVP customer journey is complete.

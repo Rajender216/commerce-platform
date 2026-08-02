@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-MVP Phase 2 - Authentication and Customer Service.
+MVP Phase 3 - API Gateway and Eureka Service Discovery.
 
 ## Repository State
 
@@ -17,13 +17,16 @@ Current repository contents:
 - Build verification scripts
 - `services/catalog-service` MVP catalog implementation
 - `services/customer-service` MVP customer implementation
+- `platform/discovery-server` Eureka registry
+- `platform/api-gateway` reactive edge gateway
 - Keycloak, Mailpit, and PostgreSQL local infrastructure in
   `infrastructure/compose.yaml`
 - Keycloak realm import in `infrastructure/keycloak/realm-commerce-mvp.json`
 - Active MVP roadmap documentation
 
-Application code exists in `services/catalog-service` and
-`services/customer-service`.
+Application code exists in `services/catalog-service`,
+`services/customer-service`, `platform/discovery-server`, and
+`platform/api-gateway`.
 
 ## Completed
 
@@ -54,18 +57,28 @@ Application code exists in `services/catalog-service` and
 - Lazy idempotent customer profile creation from JWT claims implemented.
 - Customer service PostgreSQL/Flyway/JPA persistence path implemented.
 - Customer unit, security/MVC, and PostgreSQL Testcontainers tests added.
+- Eureka Discovery Server added to the Maven reactor.
+- API Gateway added to the Maven reactor.
+- Catalog Service, Customer Service, and API Gateway register with Eureka.
+- Gateway routes current Catalog and Customer APIs through service discovery.
+- Gateway validates JWTs, enforces public/authenticated/admin route rules, and
+  forwards bearer tokens downstream.
+- Gateway CORS, correlation-ID propagation, and safe edge Problem responses
+  implemented.
+- Gateway route/security tests and Discovery context/configuration tests added.
+- Docker Compose updated for Discovery Server and API Gateway.
+- Gateway smoke-test script added.
 - Repository roadmap alignment updated for the MVP customer journey.
 
 ## Not Started
 
-- Gateway and discovery.
 - Cart, Order, and Notification services.
 - Angular frontend.
 - Full local showcase sample data and walkthrough.
 
 ## Next Recommended Phase
 
-Next recommended work is MVP Phase 3: Gateway and Discovery.
+Next recommended work is MVP Phase 4: Cart.
 
 Production-maturity work remains post-MVP unless explicitly approved.
 
@@ -83,8 +96,7 @@ Possible post-MVP follow-ups:
 - Do not initialize Angular yet.
 - Do not introduce Elasticsearch yet.
 - Do not commit or push without explicit approval.
-- Do not create discovery, gateway, or config-server modules unless the active
-  task explicitly approves them.
-- Do not add Cart, Order, Notification, Gateway, Kafka, Angular,
+- Do not create config-server modules unless the active task explicitly approves them.
+- Do not add Cart, Order, Notification, Kafka, Angular,
   Elasticsearch, Redis, Cloudinary, or payment capabilities without an explicit
   active task.

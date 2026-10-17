@@ -1,0 +1,62 @@
+server:
+  port: ${API_GATEWAY_PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${API_GATEWAY_SECURITY_ISSUER_URI:http://localhost:8081/realms/commerce-mvp}
+          jwk-set-uri: ${API_GATEWAY_SECURITY_JWK_SET_URI:http://localhost:8081/realms/commerce-mvp/protocol/openid-connect/certs}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: ${API_GATEWAY_CONNECT_TIMEOUT_MS:2000}
+            response-timeout: ${API_GATEWAY_RESPONSE_TIMEOUT:5s}
+
+commerce:
+  gateway:
+    routes:
+      catalog-uri: ${API_GATEWAY_CATALOG_URI:lb://catalog-service}
+      customer-uri: ${API_GATEWAY_CUSTOMER_URI:lb://customer-service}
+    correlation:
+      header-name: X-Correlation-ID
+      max-length: 128
+    cors:
+      allowed-origins: ${API_GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:4200}
+      allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      allowed-headers: Authorization,Content-Type,X-Correlation-ID
+      exposed-headers: X-Correlation-ID,Location
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    metadata-map:
+      management.context-path: /actuator
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
